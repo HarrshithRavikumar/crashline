@@ -13,7 +13,7 @@ Crash and near-miss detection for **drivers, cyclists, scooter riders, wheelchai
 ![Tests](https://img.shields.io/badge/detection%20tests-11%2F11-brightgreen)
 ![No build step](https://img.shields.io/badge/build-none-lightgrey)
 
-[The problem](#the-problem) · [Features](#features) · [How it works](#how-it-works) · [Quick start](#quick-start) · [Configuration](#configuration) · [Deploy](#deploy) · [Demo script](docs/DEMO.md)
+**[▶ Try it live](https://45-76-248-250.sslip.io)** · [The problem](#the-problem) · [Features](#features) · [How it works](#how-it-works) · [Quick start](#quick-start) · [Configuration](#configuration) · [Deploy](#deploy) · [Demo script](docs/DEMO.md)
 
 </div>
 
@@ -121,13 +121,16 @@ iPhones don't let any app send texts silently, but Shortcuts can. Every phone ha
 
 ## Quick start
 
+Clone this repo (green **Code** button above → copy the URL), then:
+
 ```bash
-git clone https://github.com/HarrshithRavikumar/crashline.git
+git clone <repo-url> crashline
 cd crashline
 npm install
 npm start
 ```
 
+- Live: <https://45-76-248-250.sslip.io>
 - App: <http://localhost:3000>
 - City map: <http://localhost:3000/map.html>
 
