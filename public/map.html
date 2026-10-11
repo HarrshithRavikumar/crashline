@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0d12">
+  <title>Crashline City Map</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { display: flex; flex-direction: column; min-height: 100dvh; }
+    .map-wrap { flex: 1; display: grid; grid-template-columns: 1fr 360px; gap: 16px; padding: 16px; max-width: 1400px; width: 100%; margin: 0 auto; }
+    #map { border-radius: var(--radius); border: 1px solid var(--border); min-height: 520px; background: var(--surface); }
+    .side { display: flex; flex-direction: column; gap: 14px; }
+    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+    .stat b { display: block; font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+    .stat small { color: var(--muted); }
+    .stat.live b { color: var(--ok); }
+    .filters { display: flex; flex-wrap: wrap; gap: 6px; }
+    .hot { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none; }
+    .hot li { display: grid; gap: 4px; cursor: pointer; padding: 8px; border-radius: 10px; }
+    .hot li:hover { background: var(--surface-2); }
+    .hot .name { font-weight: 650; }
+    .hot .meta { color: var(--muted); font-size: 0.82rem; }
+    .bar { height: 6px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+    .bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--warn), var(--danger)); }
+    .badge { font-size: 0.75rem; padding: 3px 8px; border-radius: 99px; background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+    .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.82rem; color: var(--muted); }
+    .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+    .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--surface); color: var(--text); }
+    .leaflet-popup-content { margin: 12px 14px; font: 14px system-ui, sans-serif; }
+    .leaflet-container a.leaflet-popup-close-button { color: var(--muted); }
+    .dark-tiles { filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.6); }
+    .leaflet-control-attribution { background: rgb(11 13 18 / 0.75) !important; color: var(--muted); }
+    .leaflet-control-attribution a { color: var(--accent); }
+    .live-pulse { animation: live 1.2s ease-out 4; }
+    @keyframes live { 0% { stroke-width: 2; stroke-opacity: 1; } 100% { stroke-width: 26; stroke-opacity: 0; } }
+    @media (max-width: 900px) { .map-wrap { grid-template-columns: 1fr; } #map { min-height: 420px; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="pulse-dot"></span>Crashline · City Safety Map</div>
+    <span class="badge" id="sampleBadge">Includes sample data</span>
+  </header>
+
+  <div class="map-wrap">
+    <div id="map" aria-label="Map of near misses and crashes"></div>
+
+    <aside class="side">
+      <div>
+        <h1 style="font-size:1.3rem">Where streets keep failing people</h1>
+        <p class="muted small" style="margin:4px 0 0">Every dot is an anonymous near miss, close call, or crash reported by Crashline users. Locations are rounded to about 50m and carry no names or IDs.</p>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><b id="sTotal">–</b><small>events</small></div>
+        <div class="stat"><b id="sCrash">–</b><small>crashes</small></div>
+        <div class="stat"><b id="sNear">–</b><small>near misses + close calls</small></div>
+        <div class="stat live"><b id="sLive">–</b><small>reported live by users</small></div>
+      </div>
+
+      <div class="filters" id="modeFilters"></div>
+      <label class="toggle"><input type="checkbox" id="sampleToggle" checked><span>Show sample data</span></label>
+      <div class="legend"><span><i style="background:var(--danger)"></i>Has crashes</span><span><i style="background:var(--warn)"></i>Near misses only</span></div>
+
+      <div class="card">
+        <h2>Top danger spots</h2>
+        <ol class="hot" id="hotList"></ol>
+      </div>
+
+      <a class="primary block" href="/api/events.csv" download>Download data for the city (CSV)</a>
+      <a class="ghost block" href="./">Back to the app</a>
+    </aside>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script type="module" src="map.js"></script>
+</body>
+</html>

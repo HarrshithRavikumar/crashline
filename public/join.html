@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0d12">
+  <title>Crashline Alerts</title>
+  <script>
+    // Per-invite manifest, so adding this page to an iPhone Home Screen reopens it.
+    (function () {
+      var c = new URLSearchParams(location.search).get('c') || '';
+      var l = document.createElement('link');
+      l.rel = 'manifest';
+      l.href = '/api/manifest/join?c=' + encodeURIComponent(c);
+      document.head.appendChild(l);
+    })();
+  </script>
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Crashline">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="pulse-dot"></span>Crashline</div>
+  </header>
+  <main>
+    <section class="screen active narrow join">
+      <div class="card stack">
+        <img src="icons/icon-192.png" alt="" width="64" height="64" class="join-icon">
+        <h1 id="joinTitle">You’ve been added as an emergency contact</h1>
+        <p class="muted" id="joinLead">Turn on alerts once. If they’re ever in a crash, your phone gets an instant notification with their location, even if they can’t call.</p>
+
+        <div id="joinForm" class="stack-sm">
+          <label>Your name <span class="muted">(so they know you’re set up)</span><input id="joinName" autocomplete="name" placeholder="e.g. Mom"></label>
+          <button class="primary big" id="joinBtn">Turn on crash alerts</button>
+        </div>
+
+        <div class="ios-steps" id="iosSteps" hidden>
+          <p><b>On iPhone, alerts need one extra step:</b></p>
+          <ol class="guide">
+            <li>Tap the <b>Share</b> button <span aria-hidden="true">(square with an arrow)</span> below.</li>
+            <li>Choose <b>Add to Home Screen</b>, then <b>Add</b>.</li>
+            <li>Open <b>Crashline</b> from your Home Screen and tap <b>Turn on crash alerts</b>.</li>
+          </ol>
+        </div>
+
+        <div class="join-done" id="joinDone" hidden>
+          <div class="done-badge" aria-hidden="true">✓</div>
+          <p><b>You’re set.</b> <span id="doneText"></span></p>
+          <button class="ghost" id="testLocalBtn">Show me what an alert looks like</button>
+          <button class="ghost small" id="leaveBtn">Stop getting alerts</button>
+        </div>
+        <p class="muted small" id="joinMsg" aria-live="polite"></p>
+      </div>
+      <p class="muted small center">Crashline only notifies you after a detected crash or a test. You can turn this off any time.</p>
+    </section>
+  </main>
+  <script type="module" src="join.js"></script>
+</body>
+</html>

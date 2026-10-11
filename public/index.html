@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0d12">
+  <title>Crashline</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="icon" href="icons/icon-192.png" type="image/png" sizes="192x192">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Crashline">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="Crash and near-miss detection for everyone on the road, with a language bridge and a city safety map.">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="pulse-dot"></span>Crashline</div>
+    <div class="top-actions">
+      <div class="net" id="netStatus">Online</div>
+      <button class="avatar-btn" id="settingsBtn" aria-label="Settings and integrations">
+        <img id="avatarImg" alt="" hidden>
+        <svg id="gearIcon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Setup -->
+    <section id="screen-setup" class="screen narrow">
+      <h1>Your safety profile</h1>
+      <p class="muted">Saved on this phone. It goes into the alert your contacts receive.</p>
+      <div class="card account-cta" id="setupAccount">
+        <div class="row between">
+          <div class="grow"><b id="setupAccTitle">Back up your profile</b><p class="muted small" id="setupAccLead">Create an account or sign in to keep your contacts on every device.</p></div>
+          <button type="button" class="ghost" id="setupAccToggle">Sign in / sign up</button>
+        </div>
+        <div id="setupAuthPanel" class="auth-panel" hidden></div>
+      </div>
+      <form id="setupForm" class="stack">
+        <label>Your name <input name="name" required autocomplete="name" placeholder="Alex Rivera"></label>
+        <label>Your phone number <span class="muted">(optional · adds a “Call” button to your alerts)</span>
+          <input name="phone" type="tel" autocomplete="tel" placeholder="(404) 555-0123">
+        </label>
+        <label>Language you’re most comfortable in
+          <select name="language" id="langSelect"></select>
+        </label>
+        <fieldset>
+          <legend>Emergency contacts</legend>
+          <div class="row contact-tools">
+            <button type="button" class="primary small" id="pickContactsBtn">Import from my contacts</button>
+            <button type="button" class="ghost small" id="vcfBtn">Import contact card</button>
+            <input type="file" id="vcfInput" accept=".vcf,text/vcard,text/x-vcard" multiple hidden>
+          </div>
+          <p class="muted small" id="contactsHint"></p>
+          <div id="contactsList" class="stack-sm"></div>
+          <button type="button" class="ghost" id="addContact">+ Add contact</button>
+        </fieldset>
+        <label class="toggle"><input type="checkbox" name="autoText" checked><span>Alert my contacts automatically if I don’t cancel the crash countdown <small class="muted">· recommended</small></span></label>
+        <label>Medical notes <span class="muted">(optional)</span>
+          <textarea name="medical" rows="2" placeholder="Allergies, conditions, medications, blood type"></textarea>
+        </label>
+        <label>Vehicle <span class="muted">(optional)</span>
+          <input name="vehicle" placeholder="Silver 2018 Honda Civic, GA ABC1234">
+        </label>
+        <button class="primary" type="submit">Save profile</button>
+      </form>
+    </section>
+
+    <!-- Home -->
+    <section id="screen-home" class="screen">
+      <div class="card install-card" id="installCard" hidden>
+        <img src="icons/icon-192.png" alt="" width="48" height="48">
+        <div class="grow">
+          <b>Install Crashline</b>
+          <p class="muted small" id="installHint">Add it to your home screen so it opens full screen and works with no signal.</p>
+        </div>
+        <button class="primary" id="installBtn">Install</button>
+        <button class="icon" id="installClose" aria-label="Dismiss">×</button>
+      </div>
+
+      <div class="home-grid">
+        <div class="col col-main">
+          <div class="modes" id="modeChips" role="radiogroup" aria-label="How are you traveling?"></div>
+
+          <div class="card hero">
+            <div class="row between">
+              <div class="mode" id="modeLabel"><span class="mode-dot"></span><span id="modeText">Not monitoring</span></div>
+              <span class="pill" id="autoPill" hidden>Auto-start on</span>
+            </div>
+            <canvas id="gChart" aria-label="Live force chart"></canvas>
+            <div class="readouts">
+              <div><b id="gNow">0.00</b><small>g now</small></div>
+              <div><b id="gPeak">0.00</b><small>g peak</small></div>
+              <div><b id="speedNow">–</b><small>mph</small></div>
+              <div><b id="nearCount">0</b><small>near misses</small></div>
+            </div>
+            <div class="trip-stats desktop-only">
+              <div><b id="tripTime">0:00</b><small>trip time</small></div>
+              <div><b id="tripDist">0.0</b><small>miles</small></div>
+              <div><b id="tripMax">–</b><small>top mph</small></div>
+              <div><b id="bbStatus">Ready</b><small>black box</small></div>
+            </div>
+            <div class="row bb-row" id="camRow" hidden>
+              <video id="camPreview" playsinline muted></video>
+              <span class="muted small">Dashcam recording · keeping the last minute</span>
+            </div>
+            <button class="primary big" id="driveBtn">Start trip</button>
+            <button class="warn-btn big" id="closeCallBtn">Log a close call</button>
+          </div>
+        </div>
+
+        <div class="col col-map desktop-only">
+          <div class="card map-card">
+            <div class="row between"><h2>Live city map</h2><a class="ghost small" href="map.html" target="_blank" rel="noopener">Open full map</a></div>
+            <div id="miniMap"></div>
+          </div>
+          <div class="card">
+            <div class="row between"><h2>Live reports</h2><span class="muted small" id="feedNote"></span></div>
+            <ul class="feed" id="feedList"></ul>
+          </div>
+        </div>
+
+        <div class="col col-side">
+          <div id="homeRequests" class="stack-sm"></div>
+
+          <div class="card alerts-ready" id="alertsReady" hidden>
+            <div class="grow"><b id="alertsReadyTitle">No one gets automatic alerts yet</b><p class="muted small" id="alertsReadyLead">Invite your contacts so a crash reaches them instantly.</p></div>
+            <button class="primary small" id="alertsReadyBtn">Invite</button>
+          </div>
+
+          <div class="card link-card" id="talkCard">
+            <div>
+              <b>Language bridge</b>
+              <p class="muted small">Talk with police or the other driver in <span id="talkLangName">your language</span>.</p>
+            </div>
+            <button class="ghost" id="openTalkBtn">Open</button>
+          </div>
+
+          <div class="card link-card mobile-only">
+            <div>
+              <b>City safety map</b>
+              <p class="muted small" id="mapNote">Your near misses, shared anonymously, show where streets need fixing.</p>
+            </div>
+            <a class="ghost" href="map.html" target="_blank" rel="noopener">View</a>
+          </div>
+
+          <div class="card link-card">
+            <div>
+              <b>Settings & integrations</b>
+              <p class="muted small" id="settingsSummary">Google sign-in, black box, auto-start, your phone, your car.</p>
+            </div>
+            <button class="ghost" id="openSettingsBtn">Open</button>
+          </div>
+
+          <div class="card qr-card desktop-only">
+            <div class="qr" id="qrHome"></div>
+            <div><b>Open on your phone</b><p class="muted small">Scan to run Crashline where the sensors are.</p></div>
+          </div>
+
+          <div class="card stack-sm">
+            <label class="toggle"><input type="checkbox" id="shareToggle"><span>Share near misses anonymously with the city map <small class="muted">· location rounded to ~50m, no name or ID</small></span></label>
+            <label class="toggle"><input type="checkbox" id="demoToggle"><span>Demo mode <small class="muted">· medium shake = near miss, hard shake = crash, 10s countdown</small></span></label>
+            <label class="toggle"><input type="checkbox" id="micToggle"><span>Listen for crash sounds</span></label>
+            <div class="row">
+              <button class="ghost small" id="simulateNearBtn">Simulate near miss</button>
+              <button class="ghost small" id="simulateBtn">Simulate crash</button>
+              <button class="ghost small" id="simulateRideBtn">Simulate a ride</button>
+              <button class="ghost small" id="editProfileBtn">Edit profile</button>
+            </div>
+          </div>
+          <p class="muted small" id="sensorNote"></p>
+          <p class="muted small" id="serverNote"></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Countdown -->
+    <section id="screen-countdown" class="screen alarm narrow">
+      <h1>Crash detected</h1>
+      <p id="countdownLead">Alerting your emergency contacts in</p>
+      <div class="countdown" id="countdownNum">30</div>
+      <p class="reason" id="detectReason"></p>
+      <button class="ok big" id="okBtn">I’m OK, cancel</button>
+      <button class="danger-outline" id="sendNowBtn">Send help now</button>
+    </section>
+
+    <!-- Help -->
+    <section id="screen-help" class="screen">
+      <div class="help-grid">
+        <div class="col">
+          <div class="alert-status" id="alertStatus">Sending alert…</div>
+          <ul class="ack-feed" id="ackFeed" hidden></ul>
+          <button class="danger big" id="manualAlertBtn" hidden>Alert my contacts now</button>
+          <div class="row">
+            <a class="danger big grow" href="tel:911">Call 911</a>
+          </div>
+          <a class="ghost block" id="smsFallback" href="#">Text my contacts from this phone</a>
+          <button class="accent-outline block" id="helpTalkBtn">Talk to police in your language</button>
+          <div class="card" id="triage"></div>
+        </div>
+
+        <div class="col">
+          <div class="card" id="stepsCard">
+            <div class="row between">
+              <h2>What to do now</h2>
+              <button class="ghost small" id="speakBtn">Read aloud</button>
+            </div>
+            <p class="muted small" id="stepsSource"></p>
+            <ol id="stepsList" class="steps"></ol>
+          </div>
+          <div class="card">
+            <h2>Ask anything</h2>
+            <form id="askForm" class="row">
+              <input id="askInput" class="grow" placeholder="The driver won’t give me their insurance…" autocomplete="off">
+              <button class="primary">Ask</button>
+            </form>
+            <p id="askAnswer" class="answer"></p>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card bb-card" id="bbCard">
+            <div class="row between"><h2>Black box</h2><span class="pill" id="bbPill">Saving…</span></div>
+            <p class="muted small" id="bbLead">Saving the minute before the crash and 10 seconds after.</p>
+            <div id="bbBody" class="stack-sm" hidden></div>
+          </div>
+
+          <div class="card stack-sm">
+            <h2>Incident report</h2>
+            <p class="muted small">Everything your insurer will ask for. Time and location are filled in.</p>
+            <label>Other driver’s name <input id="rDriver"></label>
+            <label>Their plate <input id="rPlate"></label>
+            <label>Their insurance and policy number <input id="rInsurance"></label>
+            <label>Notes <textarea id="rNotes" rows="3" placeholder="What happened, witnesses, police report number"></textarea></label>
+            <button class="primary" id="shareReport">Share report</button>
+          </div>
+          <button class="ghost block" id="doneBtn">I’m safe, close this incident</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Language bridge -->
+    <section id="screen-talk" class="screen talk">
+      <div class="talk-grid">
+        <div class="half them" id="themHalf">
+          <div class="half-head"><span class="lang-tag">English</span><span class="muted small">Officer or other driver</span></div>
+          <p class="bubble" id="themText"></p>
+          <p class="said" id="themSaid"></p>
+          <div class="row">
+            <button class="mic" id="themMic">Speak English</button>
+            <form class="row grow" id="themType"><input class="grow" placeholder="Or type in English" autocomplete="off"><button class="ghost">Send</button></form>
+          </div>
+        </div>
+
+        <div class="row between talk-tools">
+          <button class="ghost small mobile-only" id="flipBtn">Flip top half for face-to-face</button>
+          <button class="ghost small" id="rightsBtn">Know your rights</button>
+        </div>
+
+        <div class="half me" id="meHalf">
+          <div class="half-head"><span class="lang-tag" id="meLang">English</span><span class="muted small" id="meWho">You</span></div>
+          <p class="bubble" id="meText"></p>
+          <p class="said" id="meSaid"></p>
+          <div class="row">
+            <button class="mic" id="meMic">Speak</button>
+            <form class="row grow" id="meType"><input class="grow" autocomplete="off"><button class="ghost">➤</button></form>
+          </div>
+          <div class="rights" id="rightsBox" hidden></div>
+          <p class="muted small" id="phrasesHint"></p>
+          <div class="phrases" id="phrases"></div>
+        </div>
+      </div>
+      <button class="ghost block" id="talkBack">Back</button>
+    </section>
+
+    <!-- Settings & integrations -->
+    <section id="screen-settings" class="screen">
+      <div class="row between"><h1>Settings & integrations</h1><button class="ghost" id="settingsBack">Done</button></div>
+      <div class="settings-grid">
+        <div class="card" id="accountCard">
+          <h2>Account</h2>
+          <div id="accountBox"></div>
+        </div>
+
+        <div class="card stack-sm" id="alertsSettings">
+          <h2>Emergency alerts</h2>
+          <label class="toggle"><input type="checkbox" id="autoTextToggle"><span>Send alerts automatically if I don’t cancel the crash countdown</span></label>
+          <ul class="channel-list" id="channelList"></ul>
+          <div class="invite-box" id="inviteBox" hidden>
+            <p class="small"><b>Invite your contacts to instant alerts.</b> They open the link once and allow notifications. No app or account needed.</p>
+            <div class="row invite-qr-row">
+              <div class="qr" id="inviteQr"></div>
+              <div class="stack-sm grow">
+                <ul class="invite-contacts" id="inviteContacts"></ul>
+                <div class="row"><button class="ghost small" id="shareInviteBtn">Share link</button><button class="ghost small" id="copyInviteBtn">Copy link</button></div>
+              </div>
+            </div>
+          </div>
+          <div class="row"><button class="ghost" id="inviteToggleBtn">Invite contacts</button><button class="ghost" id="testAlertBtn">Send a test alert</button></div>
+          <p class="muted small" id="testAlertResult" aria-live="polite"></p>
+        </div>
+
+        <div class="card stack-sm" id="peopleCard">
+          <h2>People on Crashline</h2>
+          <div id="peopleBody" class="stack-sm"></div>
+        </div>
+
+        <div class="card stack-sm" id="selfTextCard">
+          <h2>Auto-text from my iPhone</h2>
+          <p class="muted small">After the countdown, your iPhone texts your emergency contacts from <b>your own number</b> with your location and a live map. Your contacts come from Crashline, so you never edit the Shortcut. Takes about a minute.</p>
+          <p class="auth-error" id="selfTextWarn" hidden></p>
+          <ol class="guide self-steps">
+            <li><b>Turn on iCloud Mail</b> on your iPhone: Settings → your name → iCloud → iCloud Mail.</li>
+            <li><b>Your iCloud email</b>
+              <div class="row"><input id="selfEmail" class="grow" type="email" inputmode="email" placeholder="you@icloud.com" autocomplete="email"><button class="ghost small" id="selfEmailSave">Save</button></div>
+            </li>
+            <li><b>Add the Crashline Shortcut.</b>
+              <div class="row" id="shortcutRow"><a class="primary small" id="getShortcutBtn" target="_blank" rel="noopener">Add Shortcut</a></div>
+              <p class="muted small" id="noShortcutMsg" hidden>The team hasn’t shared the Shortcut link yet. Build it with the steps under “Build the Shortcut” below.</p>
+            </li>
+            <li><b>Make it run on its own:</b> Shortcuts → <b>Automation</b> → <b>+</b> → <b>Email</b>.
+              <ul>
+                <li><b>Sender</b>: <code id="senderAddr">the Crashline email</code> <button class="ghost tiny" id="copySender" type="button">Copy</button></li>
+                <li><b>Subject Contains</b>: <code>CRASHLINE SOS</code></li>
+                <li>Choose <b>Run Immediately</b>, tap <b>Next</b>, and pick <b>Crashline SOS</b>.</li>
+              </ul>
+            </li>
+            <li><b>Test it.</b> This texts <b>you</b> (<span id="selfPhone">your number</span>), not your contacts. The first time, iOS asks to allow messages, so tap <b>Always Allow</b>.
+              <div class="row"><button class="ghost" id="selfTestBtn">Send test</button></div>
+              <p class="muted small" id="selfTestMsg" aria-live="polite"></p>
+            </li>
+          </ol>
+          <details class="setup-steps" id="selfSteps">
+            <summary>Build the Shortcut (one person on the team, once)</summary>
+            <ol class="guide">
+              <li>Shortcuts → <b>+</b> → name it <b>Crashline SOS</b>. In its settings (ⓘ), turn on <b>Receive input</b> from Emails (or Anything).</li>
+              <li><b>Get Details of Emails</b> → <b>Subject</b> of <b>Shortcut Input</b>.</li>
+              <li><b>Split Text</b> (the Subject) by <b>Spaces</b>, then <b>Get Item from List</b> → <b>Last Item</b>.</li>
+              <li><b>URL</b>: <code id="shortcutBase"></code> and add the <b>Item from List</b> variable to the end. Then add <b>Get Contents of URL</b>.</li>
+              <li><b>Get Dictionary Value</b> for key <code>to</code>. Then <b>Repeat with Each</b> item in it, and inside the loop add <b>Send Message</b>.</li>
+              <li>In <b>Send Message</b>, set the message to the <code>text</code> value (add <b>Get Dictionary Value</b> for <code>text</code> from <b>Contents of URL</b> above the loop) and the recipient to <b>Repeat Item</b>. Tap the arrow and turn off <b>Show When Run</b>.</li>
+              <li>Share → <b>Copy iCloud Link</b>, put it in <code>.env</code> as <code>SHORTCUT_URL=</code>, and redeploy. After that, everyone gets the <b>Add Shortcut</b> button.</li>
+            </ol>
+          </details>
+        </div>
+
+        <div class="card">
+          <h2>Permissions</h2>
+          <p class="muted small">What Crashline can use on this device. Everything except motion is optional.</p>
+          <ul class="perm-list" id="permList"></ul>
+        </div>
+
+        <div class="card stack-sm" id="detectionCard">
+          <h2>Crash detection</h2>
+          <p class="muted small">Crashline weighs impact force and duration, free fall (dropped phone), spinning, tipping over, speed, stillness afterward, and sound into one confidence score.</p>
+          <div class="seg seg3" role="radiogroup" aria-label="Sensitivity" id="sensSeg">
+            <button type="button" data-sens="low">Fewer alarms</button>
+            <button type="button" data-sens="normal">Balanced</button>
+            <button type="button" data-sens="high">More sensitive</button>
+          </div>
+          <p class="muted small" id="sensNote"></p>
+          <h3>Detection Lab</h3>
+          <p class="muted small">Replays recorded sensor data from real-world situations, including look-alikes that must not set off an alarm.</p>
+          <button class="primary" id="labRunAll">Run all tests</button>
+          <ul class="lab-list" id="labList"></ul>
+        </div>
+
+        <div class="card stack-sm">
+          <h2>Black box</h2>
+          <p class="muted small">Motion and GPS from the minute before a crash are always saved, on this phone only, with a tamper-proof fingerprint.</p>
+          <label class="toggle"><input type="checkbox" id="dashcamToggle"><span>Dashcam: record video during trips <small class="muted">· mount the phone facing the road</small></span></label>
+          <label class="toggle"><input type="checkbox" id="dashAudioToggle"><span>Include audio in dashcam video</span></label>
+          <h3>Saved incidents</h3>
+          <ul class="incident-list" id="incidentList"></ul>
+        </div>
+
+        <div class="card stack-sm">
+          <h2>Automatic trips</h2>
+          <label class="toggle"><input type="checkbox" id="autoStartToggle"><span>Start a trip automatically when I start moving <small class="muted">· guesses walk, bike, or drive from your speed</small></span></label>
+          <p class="muted small">Works while Crashline is open (for example, on a phone mount). Websites can’t run in the background, so fully hands-off detection needs the native app on our roadmap. Trips it starts end after 3 minutes stopped.</p>
+        </div>
+
+        <div class="card">
+          <h2>Your phone <span class="muted small" id="phoneName"></span></h2>
+          <div id="phoneGuide"></div>
+        </div>
+
+        <div class="card stack-sm">
+          <h2>Your car</h2>
+          <p><b>CarPlay & car Bluetooth:</b> use the automation links in “Your phone” so a drive starts the moment your phone connects to your car.</p>
+          <div class="obd">
+            <p><b>Read speed from the car</b> <span class="pill">Experimental</span><br><span class="muted small">Plug a Bluetooth LE OBD-II adapter (~$15) into the port under the steering wheel. Chrome on Android or a computer.</span></p>
+            <button class="ghost" id="obdBtn">Connect to car</button>
+            <p class="muted small" id="obdStatus"></p>
+          </div>
+          <p class="muted small"><b>Next:</b> a native CarPlay and Android Auto app, and connected-car data (airbag deployment, crash sensors) through automaker and Cox Automotive telematics.</p>
+        </div>
+
+        <div class="card stack-sm danger-zone">
+          <h2>Delete profile</h2>
+          <p class="muted small">Removes your profile, contacts, alert invites, live alerts, and black-box recordings from this device and the server. If you made an email account, it’s deleted too.</p>
+          <button class="danger-outline" id="deleteProfileBtn">Delete my profile</button>
+        </div>
+
+        <div class="card stack-sm">
+          <h2>Health apps</h2>
+          <p class="muted small">Apple Health and Google Health Connect only share data with installed native apps, not websites. The Crashline native app will read your Medical ID (blood type, allergies, conditions) to include in alerts and log post-crash symptoms. For now, add medical notes to your profile.</p>
+          <button class="ghost" id="editMedicalBtn">Edit medical notes</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="start-overlay" id="startOverlay" hidden>
+    <div class="card">
+      <h2 id="startTitle">Start your drive</h2>
+      <p class="muted">Your automation opened Crashline. Tap to start monitoring.</p>
+      <button class="primary big" id="startOverlayBtn">Start trip</button>
+      <button class="ghost block" id="startOverlayCancel">Not now</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="vendor/qrcode.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

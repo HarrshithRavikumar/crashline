@@ -1,0 +1,21 @@
+{
+  "id": "/",
+  "name": "Crashline",
+  "short_name": "Crashline",
+  "description": "Crash and near-miss detection for drivers, cyclists, scooter riders, wheelchair users, and pedestrians, with a language bridge and a city safety map.",
+  "start_url": "/?source=app",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0d12",
+  "theme_color": "#0b0d12",
+  "categories": ["navigation", "health", "utilities"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "City safety map", "short_name": "Map", "url": "/map.html", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

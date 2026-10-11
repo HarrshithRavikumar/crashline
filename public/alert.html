@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0d12">
+  <meta name="robots" content="noindex">
+  <title>Crash alert · Crashline</title>
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="pulse-dot"></span>Crashline</div>
+    <span class="pill" id="liveTag">Live</span>
+  </header>
+  <main>
+    <section class="screen active alert-page">
+      <div class="alert-hero" id="hero">
+        <p class="eyebrow" id="heroEyebrow">Crash alert</p>
+        <h1 id="heroTitle">Loading…</h1>
+        <p id="heroSub"></p>
+      </div>
+
+      <div class="alert-grid">
+        <div class="col">
+          <div class="row alert-actions">
+            <a class="primary big grow" id="callBtn" hidden>Call</a>
+            <a class="danger big grow" href="tel:911">Call 911</a>
+          </div>
+          <div class="card map-card">
+            <div class="row between"><h2>Location</h2><span class="muted small" id="locAge"></span></div>
+            <div id="alertMap"></div>
+            <div class="row"><a class="ghost small" id="mapsLink" target="_blank" rel="noopener">Open in Google Maps</a><a class="ghost small" id="dirLink" target="_blank" rel="noopener">Directions</a></div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card">
+            <h2>Let them know you’ve seen this</h2>
+            <label>Your name <input id="ackName" autocomplete="name" placeholder="e.g. Mom"></label>
+            <div class="ack-btns">
+              <button class="ghost" data-s="seen">I’ve seen this</button>
+              <button class="primary" data-s="on_way">I’m on my way</button>
+              <button class="ghost" data-s="called_911">I called 911</button>
+              <button class="ghost" data-s="reached">I reached them</button>
+            </div>
+            <p class="muted small" id="ackMsg" aria-live="polite"></p>
+            <ul class="ack-list" id="ackList"></ul>
+          </div>
+
+          <div class="card">
+            <h2>Details</h2>
+            <dl class="details" id="details"></dl>
+          </div>
+
+          <div class="card">
+            <h2>What you can do</h2>
+            <ol class="guide">
+              <li><b>Call them.</b> If they don’t answer, call 911 and give the location above.</li>
+              <li>Tell 911 how they were traveling and any medical notes listed here.</li>
+              <li>If you go to them, park safely away from traffic and keep this page open for live location.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <p class="muted small center">This page updates automatically. Only people with this link can see it, and it expires after 48 hours.</p>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script type="module" src="alert.js"></script>
+</body>
+</html>

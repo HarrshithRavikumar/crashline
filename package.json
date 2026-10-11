@@ -1,0 +1,21 @@
+{
+  "name": "crashline",
+  "version": "1.0.0",
+  "description": "Crash detection, emergency alerts, and post-crash guidance from your phone.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node tests/detector.test.mjs && node tests/demo.test.mjs"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "jose": "^5.10.0",
+    "nodemailer": "^6.9.16",
+    "web-push": "^3.6.7"
+  }
+}
