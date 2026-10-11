@@ -325,12 +325,12 @@
             </li>
             <li><b>Make it run on its own:</b> Shortcuts → <b>Automation</b> → <b>+</b> → <b>Email</b>.
               <ul>
-                <li><b>Sender</b>: <code id="senderAddr">the Crashline email</code> <button class="ghost tiny" id="copySender" type="button">Copy</button></li>
+                <li><b>Sender</b>: <span id="senderAddr">the Crashline email</span> <button class="ghost tiny" id="copySender" type="button">Copy email</button></li>
                 <li><b>Subject Contains</b>: <code>CRASHLINE SOS</code></li>
                 <li>Choose <b>Run Immediately</b>, tap <b>Next</b>, and pick <b>Crashline SOS</b>.</li>
               </ul>
             </li>
-            <li><b>Test it.</b> This texts <b>you</b> (<span id="selfPhone">your number</span>), not your contacts. The first time, iOS asks to allow messages, so tap <b>Always Allow</b>.
+            <li><b>Test it.</b> This texts <b>your own number</b>, not your contacts. The first time, iOS asks to allow messages, so tap <b>Always Allow</b>.
               <div class="row"><button class="ghost" id="selfTestBtn">Send test</button></div>
               <p class="muted small" id="selfTestMsg" aria-live="polite"></p>
             </li>

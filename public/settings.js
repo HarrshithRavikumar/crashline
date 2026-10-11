@@ -69,8 +69,9 @@ export function initSettings(context) {
   $('#selfEmailSave').onclick = saveSelfEmail;
   $('#selfTestBtn').onclick = testSelfText;
   $('#copySender').onclick = async () => {
-    const v = $('#senderAddr').textContent;
-    try { await navigator.clipboard.writeText(v); toast('Sender copied'); } catch { toast(v); }
+    const v = $('#senderAddr').dataset.addr;
+    if (!v) return;
+    try { await navigator.clipboard.writeText(v); toast('Sender email copied. Paste it into the automation.'); } catch { toast(v); }
   };
   $('#deleteProfileBtn').onclick = () => ctx.deleteProfile();
   initDetection();
@@ -247,8 +248,10 @@ async function renderSelfText() {
   const info = ctx.serverInfo();
   $('#selfEmail').value = p?.selfEmail || '';
   if (p?.selfEmail && !p.selfToken) ctx.updateProfile({ selfToken: newSelfToken() });
-  $('#selfPhone').textContent = p?.phone || 'add your number in your profile';
-  $('#senderAddr').textContent = info.emailFrom || 'the Crashline email';
+  const sender = $('#senderAddr');
+  sender.textContent = 'the Crashline email';
+  sender.dataset.addr = info.emailFrom || '';
+  $('#copySender').hidden = !info.emailFrom;
   $('#shortcutBase').textContent = `${location.origin}/s/`;
   const btn = $('#getShortcutBtn');
   if (info.shortcutUrl) { btn.href = info.shortcutUrl; $('#shortcutRow').hidden = false; $('#noShortcutMsg').hidden = true; }

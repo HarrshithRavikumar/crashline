@@ -1,5 +1,5 @@
 // Keeps the app usable with no signal after a crash.
-const CACHE = 'crashline-v12';
+const CACHE = 'crashline-v13';
 const ASSETS = [
   './', 'index.html', 'styles.css', 'app.js', 'util.js', 'detector.js', 'guidance.js', 'i18n.js', 'talk.js', 'install.js', 'blackbox.js', 'bbview.js', 'autostart.js', 'obd.js', 'platform.js', 'auth.js', 'settings.js', 'desktop.js', 'authpanel.js', 'invites.js', 'contacts.js', 'join.html', 'join.js', 'alert.html', 'alert.js', 'people.js', 'scenarios.js',
   'vendor/leaflet/leaflet.js', 'vendor/leaflet/leaflet.css', 'vendor/qrcode.js', 'vendor/auth0-spa-js.esm.js',
